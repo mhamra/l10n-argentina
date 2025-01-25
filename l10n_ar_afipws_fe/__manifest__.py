@@ -22,7 +22,7 @@
         "python": [
             "OpenSSL",
             "pysimplesoap",
-            "pyafipws@https://github.com/reingart/pyafipws/archive/main.zip",
+            "pyafipws",
         ]
     },
     "data": [
