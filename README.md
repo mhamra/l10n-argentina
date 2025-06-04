@@ -21,8 +21,8 @@ Available addons
 ----------------
 addon | version | maintainers | summary
 --- | --- | --- | ---
-[l10n_ar_afipws](l10n_ar_afipws/) | 16.0.1.0.0 | [![nimarosa](https://github.com/nimarosa.png?size=30px)](https://github.com/nimarosa) [![ibuioli](https://github.com/ibuioli.png?size=30px)](https://github.com/ibuioli) | Integration for Argentina Electronic invoice webservices
-[l10n_ar_afipws_fe](l10n_ar_afipws_fe/) | 16.0.1.0.0 | [![nimarosa](https://github.com/nimarosa.png?size=30px)](https://github.com/nimarosa) [![ibuioli](https://github.com/ibuioli.png?size=30px)](https://github.com/ibuioli) | Integrate AFIP webservice for Argentina electronic documents
+[l10n_ar_afipws](l10n_ar_afipws/) | 16.0.1.0.0 | <a href='https://github.com/nimarosa'><img src='https://github.com/nimarosa.png' width='32' height='32' style='border-radius:50%;' alt='nimarosa'/></a> <a href='https://github.com/ibuioli'><img src='https://github.com/ibuioli.png' width='32' height='32' style='border-radius:50%;' alt='ibuioli'/></a> | Integration for Argentina Electronic invoice webservices
+[l10n_ar_afipws_fe](l10n_ar_afipws_fe/) | 16.0.1.0.0 | <a href='https://github.com/nimarosa'><img src='https://github.com/nimarosa.png' width='32' height='32' style='border-radius:50%;' alt='nimarosa'/></a> <a href='https://github.com/ibuioli'><img src='https://github.com/ibuioli.png' width='32' height='32' style='border-radius:50%;' alt='ibuioli'/></a> | Integrate AFIP webservice for Argentina electronic documents
 [l10n_ar_bank](l10n_ar_bank/) | 16.0.1.0.0 |  | Listado de Bancos Argentinos
 
 [//]: # (end addons)
