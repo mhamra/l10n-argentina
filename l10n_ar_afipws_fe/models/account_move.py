@@ -441,5 +441,9 @@ class AccountMove(models.Model):
                     if vat_code in vat_by_code:
                         vat_by_code[vat_code]["BaseImp"] += line.price_subtotal
 
+
+        for vat in vat_by_code.values():
+            vat["BaseImp"] = round(vat["BaseImp"], 2)
+            vat["Importe"] = round(vat["Importe"], 2)
         vat_taxes = list(vat_by_code.values())
         return vat_taxes
