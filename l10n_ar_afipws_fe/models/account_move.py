@@ -324,7 +324,7 @@ class AccountMove(models.Model):
                 response_vals["afip_xml_response"],
             )
         self.write(response_vals)
-        self._cr.commit()  # pylint: disable=invalid-commit
+        self.env.commit()  # pylint: disable=invalid-commit
 
     def _init_afip_base_header(self):
         invoice = {}
