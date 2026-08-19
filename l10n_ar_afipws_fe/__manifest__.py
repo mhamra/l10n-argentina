@@ -3,7 +3,7 @@
 
 {
     "name": "Factura Electronica - Argentina",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Accounting/Localizations",
     "sequence": 14,
     "author": "Nimarosa, ADHOC SA, Odoo Community Association (OCA)",
@@ -23,12 +23,14 @@
         ]
     },
     "data": [
+        "security/ir.model.access.csv",
         "views/account_move_view.xml",
         "views/account_journal_view.xml",
         "views/res_config_settings.xml",
         "views/report_invoice.xml",
         "data/automatic_post_cron.xml",
         "wizard/account_validate_account_move_view.xml",
+        "wizard/afip_ws_consult_view.xml",
     ],
     "maintainers": ["nimarosa", "ibuioli"],
     "demo": [],
