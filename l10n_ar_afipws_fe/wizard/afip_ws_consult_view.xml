@@ -77,6 +77,6 @@
         parent="l10n_ar_afipws.menu_afipws"
         action="action_afip_ws_consult"
         sequence="100"
-        groups="account.group_account_user"
+        groups="base.group_user"
     />
 </odoo>
