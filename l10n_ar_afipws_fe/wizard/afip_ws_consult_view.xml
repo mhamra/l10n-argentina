@@ -74,7 +74,7 @@
     <menuitem
         id="menu_afip_ws_consult"
         name="Consult Invoice in ARCA"
-        parent="account.menu_finance_entries"
+        parent="l10n_ar_afipws.menu_afipws"
         action="action_afip_ws_consult"
         sequence="100"
         groups="account.group_account_user"
