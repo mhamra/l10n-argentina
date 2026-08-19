@@ -336,6 +336,20 @@ class AccountMove(models.Model):
         # purposes, while amount_total remains positive.
         if self.move_type in ("out_refund", "in_refund"):
             amounts = {key: abs(value) for key, value in amounts.items()}
+            if not any(amounts.values()) and self.amount_total:
+                vat_taxes = self._get_vat()
+                amounts["vat_amount"] = sum(tax["Importe"] for tax in vat_taxes)
+                amounts["vat_taxable_amount"] = sum(
+                    tax["BaseImp"]
+                    for tax in vat_taxes
+                    if str(tax["Id"]) not in ("0", "1", "2")
+                )
+                amounts["vat_exempt_base_amount"] = sum(
+                    tax["BaseImp"] for tax in vat_taxes if str(tax["Id"]) == "2"
+                )
+                amounts["vat_untaxed_base_amount"] = sum(
+                    tax["BaseImp"] for tax in vat_taxes if str(tax["Id"]) == "1"
+                )
 
         # Build basic header data
         invoice["concepto"] = invoice["tipo_expo"] = int(self.l10n_ar_afip_concept)
