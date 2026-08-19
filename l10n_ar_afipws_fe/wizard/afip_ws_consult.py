@@ -16,7 +16,10 @@ class AfipWsConsult(models.TransientModel):
     journal_id = fields.Many2one(
         "account.journal",
         required=True,
-        domain="[('type', '=', 'sale'), ('afip_ws', '!=', False)]",
+        domain=(
+            "[('type', '=', 'sale'), "
+            "('l10n_ar_afip_pos_system', 'in', ['RAW_MAW', 'FEEWS', 'BFEWS'])]"
+        ),
     )
     available_document_type_ids = fields.Many2many(
         "l10n_latam.document.type",
