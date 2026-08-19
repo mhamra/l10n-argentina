@@ -1,7 +1,9 @@
 import json
+from datetime import datetime
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import float_compare
 
 try:
     from zeep.helpers import serialize_object
@@ -30,6 +32,15 @@ class AfipWsConsult(models.TransientModel):
         required=True,
     )
     number = fields.Integer(required=True)
+    move_id = fields.Many2one(
+        "account.move",
+        string="Draft invoice to recover",
+        domain=(
+            "[('state', '=', 'draft'), ('move_type', '=', 'out_invoice'), "
+            "('journal_id', '=', journal_id), "
+            "('l10n_latam_document_type_id', '=', document_type_id)]"
+        ),
+    )
 
     queried = fields.Boolean(readonly=True)
     result = fields.Char(readonly=True)
@@ -73,6 +84,7 @@ class AfipWsConsult(models.TransientModel):
                 "authorization_due_date": False,
                 "invoice_date": False,
                 "response_data": False,
+                "move_id": False,
             }
         )
 
@@ -149,6 +161,104 @@ class AfipWsConsult(models.TransientModel):
         self.number = self.journal_id.get_pyafipws_last_invoice(self.document_type_id)
         self._clear_response()
         return self._reopen()
+
+    def _get_response_data(self):
+        self.ensure_one()
+        if not self.queried or not self.response_data:
+            raise UserError(self.env._("Consult ARCA before recovering an invoice."))
+        if self.result != "A" or not self.authorization_code:
+            raise UserError(
+                self.env._(
+                    "Only invoices approved by ARCA with a CAE can be recovered."
+                )
+            )
+        return json.loads(self.response_data)
+
+    def _validate_recovery_invoice(self, move, data):
+        self.ensure_one()
+        if move.state != "draft" or move.move_type != "out_invoice":
+            raise UserError(self.env._("Select a draft customer invoice."))
+        if move.journal_id != self.journal_id:
+            raise UserError(
+                self.env._("The draft invoice must use the selected journal.")
+            )
+        if move.l10n_latam_document_type_id != self.document_type_id:
+            raise UserError(
+                self.env._("The draft invoice must use the selected document type.")
+            )
+        if float_compare(
+            move.amount_total,
+            self.amount_total,
+            precision_rounding=move.currency_id.rounding,
+        ):
+            raise UserError(
+                self.env._(
+                    "The draft total (%(draft)s) does not match the ARCA total "
+                    "(%(arca)s).",
+                    draft=move.amount_total,
+                    arca=self.amount_total,
+                )
+            )
+
+        arca_date = datetime.strptime(self.invoice_date, "%Y%m%d").date()
+        if move.invoice_date != arca_date:
+            raise UserError(
+                self.env._(
+                    "The draft invoice date must match ARCA (%(date)s).",
+                    date=arca_date,
+                )
+            )
+
+        arca_vat = str(self._first_value(data, "DocNro", "Doc_nro") or "")
+        partner_vat = "".join(
+            char for char in (move.commercial_partner_id.vat or "") if char.isdigit()
+        )
+        if arca_vat and partner_vat != arca_vat:
+            raise UserError(
+                self.env._("The draft customer VAT number does not match ARCA.")
+            )
+
+    def action_recover_invoice(self):
+        self.ensure_one()
+        if not self.move_id:
+            raise UserError(self.env._("Select the draft invoice to recover."))
+        data = self._get_response_data()
+        move = self.move_id
+        self._validate_recovery_invoice(move, data)
+
+        duplicate = self.env["account.move"].search_count(
+            [
+                ("id", "!=", move.id),
+                ("company_id", "=", move.company_id.id),
+                ("journal_id", "=", move.journal_id.id),
+                ("name", "=", move._get_formatted_sequence(self.number)),
+            ]
+        )
+        if duplicate:
+            raise UserError(
+                self.env._("An invoice with this ARCA number already exists in Odoo.")
+            )
+
+        move.write(
+            {
+                "name": move._get_formatted_sequence(self.number),
+                "afip_result": "A",
+                "afip_auth_mode": "CAE",
+                "afip_auth_code": self.authorization_code,
+                "afip_auth_code_due": datetime.strptime(
+                    self.authorization_due_date, "%Y%m%d"
+                ).date(),
+                "afip_message": self.env._("Recovered from ARCA consultation."),
+            }
+        )
+        move.action_post()
+        move.write({"afip_xml_response": self.response_data})
+        return {
+            "type": "ir.actions.act_window",
+            "res_model": "account.move",
+            "res_id": move.id,
+            "view_mode": "form",
+        }
 
     def action_consult(self):
         self.ensure_one()

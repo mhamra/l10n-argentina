@@ -44,6 +44,12 @@
                         <field name="authorization_due_date" />
                     </group>
                 </group>
+                <group invisible="not queried">
+                    <field
+                        name="move_id"
+                        options="{'no_create': True, 'no_open': True}"
+                    />
+                </group>
                 <field
                     name="response_data"
                     nolabel="1"
@@ -57,6 +63,13 @@
                         string="Consult ARCA"
                         type="object"
                         class="btn-primary"
+                    />
+                    <button
+                        name="action_recover_invoice"
+                        string="Recover Draft Invoice"
+                        type="object"
+                        class="btn-primary"
+                        invisible="not queried or result != 'A' or not move_id"
                     />
                     <button string="Close" special="cancel" class="btn-secondary" />
                 </footer>
