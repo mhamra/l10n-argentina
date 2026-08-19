@@ -9,6 +9,13 @@
             <field name="afip_ws_env_type" position="after">
                 <label for="l10n_ar_afip_fce_transmission" />
                 <field class="fw-bold" name="l10n_ar_afip_fce_transmission" />
+                <button
+                    class="btn-link"
+                    icon="fa-arrow-right"
+                    name="%(l10n_ar_afipws_fe.action_afip_ws_consult)d"
+                    string="Consult invoice in ARCA"
+                    type="action"
+                />
             </field>
         </field>
     </record>
