@@ -331,6 +331,12 @@ class AccountMove(models.Model):
         partner = self.commercial_partner_id
         amounts = self._l10n_ar_get_amounts()
 
+        # ARCA expects positive amounts in credit and debit notes. Odoo's
+        # localization returns negative components for refunds for reporting
+        # purposes, while amount_total remains positive.
+        if self.move_type in ("out_refund", "in_refund"):
+            amounts = {key: abs(value) for key, value in amounts.items()}
+
         # Build basic header data
         invoice["concepto"] = invoice["tipo_expo"] = int(self.l10n_ar_afip_concept)
         invoice["tipo_doc"] = (
@@ -409,41 +415,9 @@ class AccountMove(models.Model):
                 )
 
     def _get_vat(self):
-        """
-        Get VAT tax lines for AFIP electronic invoicing.
-        Returns a list of dicts with Id, BaseImp, and Importe keys.
-        """
-        self.ensure_one()
-        vat_taxes = []
-
-        # Get VAT tax lines from the invoice
-        vat_tax_lines = self.line_ids.filtered(
-            lambda x: x.tax_line_id and x.tax_line_id.tax_group_id.l10n_ar_vat_afip_code
-        )
-
-        # Group by VAT code
-        vat_by_code = {}
-        for line in vat_tax_lines:
-            vat_code = line.tax_line_id.tax_group_id.l10n_ar_vat_afip_code
-            if vat_code not in vat_by_code:
-                vat_by_code[vat_code] = {
-                    "Id": vat_code,
-                    "BaseImp": 0.0,
-                    "Importe": 0.0,
-                }
-            vat_by_code[vat_code]["Importe"] += abs(line.amount_currency)
-
-        # Calculate base amounts for each VAT rate
-        for line in self.invoice_line_ids:
-            for tax in line.tax_ids:
-                if tax.tax_group_id.l10n_ar_vat_afip_code:
-                    vat_code = tax.tax_group_id.l10n_ar_vat_afip_code
-                    if vat_code in vat_by_code:
-                        vat_by_code[vat_code]["BaseImp"] += line.price_subtotal
-
-
-        for vat in vat_by_code.values():
-            vat["BaseImp"] = round(vat["BaseImp"], 2)
-            vat["Importe"] = round(vat["Importe"], 2)
-        vat_taxes = list(vat_by_code.values())
+        """Return the localized VAT breakdown with ARCA-positive amounts."""
+        vat_taxes = super()._get_vat()
+        for tax in vat_taxes:
+            tax["BaseImp"] = abs(tax["BaseImp"])
+            tax["Importe"] = abs(tax["Importe"])
         return vat_taxes
