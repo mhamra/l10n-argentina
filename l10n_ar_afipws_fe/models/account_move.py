@@ -329,7 +329,8 @@ class AccountMove(models.Model):
     def _init_afip_base_header(self):
         invoice = {}
         partner = self.commercial_partner_id
-        amounts = self._l10n_ar_get_amounts()
+        base_lines = self._get_rounded_base_and_tax_lines()[0]
+        amounts = self._l10n_ar_get_amounts(base_lines)
 
         # ARCA expects positive amounts in credit and debit notes. Odoo's
         # localization returns negative components for refunds for reporting

@@ -3,7 +3,7 @@
 
 {
     "name": "Factura Electronica - Argentina",
-    "version": "19.0.1.2.2",
+    "version": "19.0.1.2.3",
     "category": "Accounting/Localizations",
     "sequence": 14,
     "author": "Nimarosa, ADHOC SA, Odoo Community Association (OCA)",
